@@ -12,11 +12,12 @@ export class UsersService {
   private users: User[] = [];
 
   constructor() {
-    this.users.push({
+    const admin = new User({
       name: 'admin',
       email: 'admin@gmail.com',
       password: c.admin.hashedPw,
     });
+    this.users.push(admin);
   }
 
   public async findOneOrThrow(email: string) {
@@ -32,11 +33,16 @@ export class UsersService {
     try {
       await this.findOneOrThrow(email);
     } catch (e) {
-      this.users.push({
+      // const newUser = {
+      //   ...user,
+      //   password: await bcrypt.hash(user.password, c.hashSalt),
+      // };
+      const newUser = new User({
         ...user,
         password: await bcrypt.hash(user.password, c.hashSalt),
       });
-      return { ...user, password: undefined };
+      this.users.push(newUser);
+      return newUser;
     }
 
     throw new ForbiddenException('email already in use');
@@ -51,6 +57,7 @@ export class UsersService {
   }
 
   public async getUsers() {
-    return this.users.map((user) => ({ ...user, password: undefined }));
+    console.log(this.users[0]);
+    return this.users;
   }
 }
